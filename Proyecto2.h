@@ -1,14 +1,13 @@
 /*
- * Libreria.h
+ * Proyecto2.h
  *
- * Created: 7/04/2025 08:58:26
+ * Created: 27/04/2025 19:23:13
  *  Author: perez
  */ 
 
 
-#ifndef LIBRERIA_H_
-#define LIBRERIA_H_
-
+#ifndef PROYECTO2_H_
+#define PROYECTO2_H_
 #include <avr/io.h>
 
 void setupL();
@@ -17,4 +16,5 @@ void iniciar_conversion();
 void ancho_pulso(uint16_t ancho);
 
 
-#endif /* LIBRERIA_H_ */
+
+#endif /* PROYECTO2_H_ */
