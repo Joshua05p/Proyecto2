@@ -1,0 +1,71 @@
+/*
+ * Proyecto2.c
+ *
+ * Created: 6/04/2025 18:33:09
+ * Author : perez
+ */ 
+
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include "Libreria.h"
+uint16_t valoradc1 = 0;
+uint16_t valoradc6 = 0;
+uint16_t valoradc7 = 0;
+uint8_t canal_actual = 6;
+uint16_t contador_adc = 0;
+uint16_t timer0 = 0;
+int main(void)
+{
+	setupL();
+	iniciar_adc();
+
+	iniciar_conversion();
+
+	while (1)
+	{
+	}
+}
+
+ISR(TIMER0_COMPA_vect){
+	if (timer0 == 0){
+		OCR0A = 78;
+		timer0 = 1;
+	}else if(timer0 == 1){
+		OCR0A = 234;
+		timer0 = 0;
+		PORTD |= (1<<PORTD0);
+	}
+}
+ISR(TIMER0_COMPB_vect){
+	PORTD &= ~(1 << PORTD0);
+}
+
+ISR(ADC_vect){
+	
+	if(canal_actual == 6){
+		ADMUX |= (1<<MUX2) | (1<<MUX1);		//cambia al canal 6
+		ADMUX &= ~(1<<MUX0);
+		canal_actual = 7;
+		valoradc6 = ADC;
+		if (valoradc6 >= 1000){
+			ancho_pulso(5000);
+			} else if (valoradc6 <= 50){
+			ancho_pulso(2000);
+			} else {
+			ancho_pulso(2000 + 2*valoradc6);
+		}
+		}else if (canal_actual == 7){
+		ADMUX |= (1<<MUX2) | (1<<MUX1) | (1<<MUX0);		//cambia al canal 7
+		canal_actual = 6;
+		valoradc7 = ADC;
+		if (valoradc7 >= 1000){
+			OCR0B = 40;
+			} else if (valoradc7 <= 50){
+			OCR0B = 15;
+			} else {
+			OCR0B = 16 + ((valoradc7 - 51) * 23) / 948;
+		}
+	}
+
+	iniciar_conversion();
+}
