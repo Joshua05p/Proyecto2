@@ -1,19 +1,27 @@
+/****************************************/
+// Encabezado (Libraries)
 /*
  * Proyecto2.c
  *
- * Created: 6/04/2025 18:33:09
+ * Created: 27/04/2025 11:25:38
  * Author : perez
  */ 
 
 #include <avr/io.h>
 #include <avr/interrupt.h>
-#include "Libreria.h"
+#include "Proyecto2.h"
+
+/****************************************/
+// Function prototypes
 uint16_t valoradc1 = 0;
 uint16_t valoradc6 = 0;
 uint16_t valoradc7 = 0;
 uint8_t canal_actual = 6;
 uint16_t contador_adc = 0;
 uint16_t timer0 = 0;
+
+/****************************************/
+// Main Function
 int main(void)
 {
 	setupL();
@@ -26,6 +34,13 @@ int main(void)
 	}
 }
 
+
+/****************************************/
+// NON-Interrupt subroutines
+
+
+/****************************************/
+// Interrupt routines
 ISR(TIMER0_COMPA_vect){
 	if (timer0 == 0){
 		OCR0A = 78;
