@@ -5,82 +5,225 @@
  *
  * Created: 27/04/2025 11:25:38
  * Author : perez
- */ 
+ */
 
+ 
 #include <avr/io.h>
 #include <avr/interrupt.h>
+#include <avr/eeprom.h>
 #include "Proyecto2.h"
 
 /****************************************/
 // Function prototypes
-uint16_t valoradc1 = 0;
-uint16_t valoradc6 = 0;
-uint16_t valoradc7 = 0;
-uint8_t canal_actual = 6;
-uint16_t contador_adc = 0;
-uint16_t timer0 = 0;
 
+uint16_t valor_servo1 = 0;
+uint16_t valor_servo2 = 0;
+uint16_t valor_servo3 = 0;
+uint16_t valor_servo4 = 0;
+uint8_t  canal_actual = 3;
+uint8_t  modo		  = 1;
+uint16_t EEMEM eeprom_valor1;
+uint16_t EEMEM eeprom_valor2;
+uint16_t EEMEM eeprom_valor3;
+uint16_t EEMEM eeprom_valor4;
 /****************************************/
 // Main Function
+
 int main(void)
 {
-	setupL();
-	iniciar_adc();
-
-	iniciar_conversion();
-
-	while (1)
-	{
-	}
+       salidas();
+	   confi_timer0();
+	   confi_timer1();
+	   confi_timer2();
+	   iniciar_USART(51);
+       iniciar_adc();
+       iniciar_conversion();
+       while (1)
+       {
+		   if (modo == 1){
+			    PORTD |= (1<<PORTD6);
+				PORTB &= ~(1<<PORTB3);
+				PORTB &= ~(1<<PORTB0);
+       }else if (modo == 2){
+				PORTD &= ~(1<<PORTD6);
+				PORTB |= (1<<PORTB0);
+				PORTB &= ~(1<<PORTB3);
+	   }else if (modo == 3){
+				PORTB &= ~(1<<PORTB0);
+				PORTD &= ~(1<<PORTD6);
+				PORTB |= (1<<PORTB3);
+	   }
 }
-
-
+}
 /****************************************/
 // NON-Interrupt subroutines
 
-
 /****************************************/
 // Interrupt routines
-ISR(TIMER0_COMPA_vect){
-	if (timer0 == 0){
-		OCR0A = 78;
-		timer0 = 1;
-	}else if(timer0 == 1){
-		OCR0A = 234;
-		timer0 = 0;
-		PORTD |= (1<<PORTD0);
-	}
+
+ISR(ADC_vect)
+{ 
+	if (modo == 1){
+		
+       if(canal_actual == 3)
+	   {
+             ADMUX |= (1<<MUX2);          //cambia al canal 4
+             ADMUX &= ~(1<<MUX0);
+			 ADMUX &= ~(1<<MUX1);
+             canal_actual = 4;
+             valor_servo1 = ADC;
+             if (valor_servo1 >= 1000)
+			 {
+                    servo1(16);
+             } else if (valor_servo1 <= 50)
+			 {
+                    servo1(8);
+             } else 
+			 {
+                    servo1(7 + ((valor_servo1 - 51) * 9) / 948);
+             }
+        }else if (canal_actual == 4)
+		{
+             ADMUX |= (1<<MUX2) | (1<<MUX0);           //cambia al canal 5
+			 ADMUX &= ~(1<<MUX1);
+             canal_actual = 5;
+             valor_servo2 = ADC;
+             if (valor_servo2 >= 1000)
+			 {
+                    servo2(16);
+             } else if (valor_servo2 <= 50)
+			 {
+                    servo2(8);
+             } else 
+			 {
+                    servo2(7 + ((valor_servo2 - 51) * 9) / 948);
+             }
+
+       }else if(canal_actual == 5)
+	   {
+             ADMUX |= (1<<MUX2) | (1<<MUX1);          //cambia al canal 6
+             ADMUX &= ~(1<<MUX0);
+             canal_actual = 6;
+             valor_servo3 = ADC;
+             if (valor_servo3 >= 1000)
+			 {
+                    servo3(16);
+             } else if (valor_servo3 <= 50)
+			 {
+                    servo3(8);
+             } else 
+			 {
+					servo3(7 + ((valor_servo3 - 51) * 9) / 948);
+             }
+       }else if(canal_actual == 6)
+	   {
+             ADMUX |= (1<<MUX0) | (1<<MUX1);          //cambia al canal 3
+             ADMUX &= ~(1<<MUX2);
+             canal_actual = 3;
+             valor_servo4 = ADC;
+             if (valor_servo4 >= 1000)
+             {
+	             servo4(16);
+             } else if (valor_servo4 <= 50)
+             {
+	             servo4(8);
+             } else
+             {
+	             servo4(7 + ((valor_servo4 - 51) * 9) / 948);
+             }		   
+		   
+	   }
 }
-ISR(TIMER0_COMPB_vect){
-	PORTD &= ~(1 << PORTD0);
+       iniciar_conversion();
+
 }
 
-ISR(ADC_vect){
-	
-	if(canal_actual == 6){
-		ADMUX |= (1<<MUX2) | (1<<MUX1);		//cambia al canal 6
-		ADMUX &= ~(1<<MUX0);
-		canal_actual = 7;
-		valoradc6 = ADC;
-		if (valoradc6 >= 1000){
-			ancho_pulso(5000);
-			} else if (valoradc6 <= 50){
-			ancho_pulso(2000);
-			} else {
-			ancho_pulso(2000 + 2*valoradc6);
+ISR(PCINT2_vect) {
+	if (!(PIND & (1 << PIND2))) {
+		if (modo ==1 ){
+		//Funcion para guardar
+		
+		/*
+		eeprom_update_word(&eeprom_valor1, valor_servo1);
+		eeprom_update_word(&eeprom_valor2, valor_servo2);
+		eeprom_update_word(&eeprom_valor3, valor_servo3);
+		eeprom_update_word(&eeprom_valor4, valor_servo4);
+		*/
 		}
-		}else if (canal_actual == 7){
-		ADMUX |= (1<<MUX2) | (1<<MUX1) | (1<<MUX0);		//cambia al canal 7
-		canal_actual = 6;
-		valoradc7 = ADC;
-		if (valoradc7 >= 1000){
-			OCR0B = 40;
-			} else if (valoradc7 <= 50){
-			OCR0B = 15;
-			} else {
-			OCR0B = 16 + ((valoradc7 - 51) * 23) / 948;
+		
+		
+	}
+	if (!(PIND & (1 << PIND4))) {
+		modo++;
+		if(modo == 4){
+			modo = 1;
+		}
+		
+		
+		if (modo == 1){
+			PORTD |= (1<<PORTD6);
+			PORTB &= ~(1<<PORTB3);
+			PORTB &= ~(1<<PORTB0);
+		}else if (modo == 2){
+			/*
+			valor_servo1 = eeprom_read_word(&eeprom_valor1);
+			valor_servo2 = eeprom_read_word(&eeprom_valor2);
+			valor_servo3 = eeprom_read_word(&eeprom_valor3);
+			valor_servo4 = eeprom_read_word(&eeprom_valor4);
+			*/
+		   ///////////////////////////////////
+	       if (valor_servo1 >= 1000)
+	       {
+		       servo1(16);
+	       } else if (valor_servo1 <= 50)
+	       {
+		       servo1(8);
+	       } else
+	       {
+		       servo1(7 + ((valor_servo1 - 51) * 9) / 948);
+	       }
+		   ///////////////////////////////////
+	       if (valor_servo2 >= 1000)
+	       {
+		       servo2(16);
+	       } else if (valor_servo2 <= 50)
+	       {
+		       servo2(8);
+	       } else
+	       {
+		       servo2(7 + ((valor_servo2 - 51) * 9) / 948);
+	       }
+		   ///////////////////////////////////
+	       if (valor_servo3 >= 1000)
+	       {
+		       servo3(16);
+	       } else if (valor_servo3 <= 50)
+	       {
+		       servo3(8);
+	       } else
+	       {
+		       servo3(7 + ((valor_servo3 - 51) * 9) / 948);
+	       }
+		   ///////////////////////////////////
+	       if (valor_servo4 >= 1000)
+	       {
+		       servo4(16);
+	       } else if (valor_servo4 <= 50)
+	       {
+		       servo4(8);
+	       } else
+	       {
+		       servo4(7 + ((valor_servo4 - 51) * 9) / 948);
+	       }
+	       
+			PORTD &= ~(1<<PORTD6);
+			PORTB |= (1<<PORTB0);
+			PORTB &= ~(1<<PORTB3);
+		}else if (modo == 3){
+			PORTB &= ~(1<<PORTB0);
+			PORTD &= ~(1<<PORTD6);
+			PORTB |= (1<<PORTB3);
 		}
 	}
-
-	iniciar_conversion();
 }
+
