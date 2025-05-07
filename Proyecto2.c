@@ -17,12 +17,13 @@ void salidas(void) {
 	   DDRB |=		(1 << DDB1) | (1 << DDB2);
        DDRD |=		(1 << DDD5) | (1 << DDD3);
 	   //LEDS
-	   DDRB |=		(1 << DDB0) | (1 << DDB3);
-	   DDRD |=		(1 << DDD6);
+	   DDRB |=		(1 << DDB0) | (1 << DDB3) | (1 << DDB4);
+	   DDRD |=		(1 << DDD6) | (1 << DDD7);
 	   
 	   //Entradas
 	   DDRD &= ~(1<<DDD2);
 	   DDRD &= ~(1<<DDD4);
+	   DDRD &= ~(1<<DDD7);
 	   PORTD |= (1 << PORTD2) | (1<<PORTD4);
 	   PCICR |=		(1<<PCIE2);
 	   PCMSK2 |=(1<<PCINT18) | (1<<PCINT20);
@@ -31,7 +32,7 @@ void salidas(void) {
 void confi_timer2(){
 	   //CONFIGURACION TIMER2
 	   TCCR2A = (1 << COM2B1) | (1 << WGM21) | (1 << WGM20);					// Fast PWM, OC0B no invertido
-	   TCCR2B = (1 << WGM22) | (1 << CS22) | (1 << CS20);						// Prescaler 1024
+	   TCCR2B = (1 << WGM22) | (1 << CS22) | (1 << CS21) | (1 << CS20);						// Prescaler 1024
 	   OCR2A  = 156;
 }
 void confi_timer1(){
@@ -90,5 +91,3 @@ void servo3(uint16_t ancho3) {
 void servo4(uint16_t ancho4) {
 		OCR2B = ancho4;
 }
-
-
