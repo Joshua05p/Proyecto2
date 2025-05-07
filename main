@@ -26,6 +26,22 @@ uint16_t EEMEM eeprom_valor1;
 uint16_t EEMEM eeprom_valor2;
 uint16_t EEMEM eeprom_valor3;
 uint16_t EEMEM eeprom_valor4;
+/////////////////////////////
+uint16_t EEMEM eeprom_valor1_1;
+uint16_t EEMEM eeprom_valor2_1;
+uint16_t EEMEM eeprom_valor3_1;
+uint16_t EEMEM eeprom_valor4_1;
+/////////////////////////////
+uint16_t EEMEM eeprom_valor1_2;
+uint16_t EEMEM eeprom_valor2_2;
+uint16_t EEMEM eeprom_valor3_2;
+uint16_t EEMEM eeprom_valor4_2;
+/////////////////////////////
+uint16_t EEMEM eeprom_valor1_3;
+uint16_t EEMEM eeprom_valor2_3;
+uint16_t EEMEM eeprom_valor3_3;
+uint16_t EEMEM eeprom_valor4_3;
+uint8_t posicion_servos = 1;
 /****************************************/
 // Main Function
 
@@ -40,19 +56,19 @@ int main(void)
        iniciar_conversion();
        while (1)
        {
-		   if (modo == 1){
-			    PORTD |= (1<<PORTD6);
-				PORTB &= ~(1<<PORTB3);
-				PORTB &= ~(1<<PORTB0);
-       }else if (modo == 2){
-				PORTD &= ~(1<<PORTD6);
-				PORTB |= (1<<PORTB0);
-				PORTB &= ~(1<<PORTB3);
-	   }else if (modo == 3){
-				PORTB &= ~(1<<PORTB0);
-				PORTD &= ~(1<<PORTD6);
-				PORTB |= (1<<PORTB3);
-	   }
+			if (posicion_servos == 1){
+				PORTD &= ~(1<<PORTD7);
+				PORTB &= ~(1<<PORTD4);
+			}else if (posicion_servos == 2){
+				PORTD |= (1<<PORTD7);
+				PORTB &= ~(1<<PORTD4);
+			}else if (posicion_servos == 3){
+				PORTD &= ~(1<<PORTD7);
+				PORTB |= (1<<PORTD4);
+			}else if (posicion_servos == 4){
+				PORTD |= (1<<PORTD7);
+				PORTB |= (1<<PORTD4);
+			}
 }
 }
 /****************************************/
@@ -67,70 +83,37 @@ ISR(ADC_vect)
 		
        if(canal_actual == 3)
 	   {
-             ADMUX |= (1<<MUX2);          //cambia al canal 4
-             ADMUX &= ~(1<<MUX0);
-			 ADMUX &= ~(1<<MUX1);
-             canal_actual = 4;
-             valor_servo1 = ADC;
-             if (valor_servo1 >= 1000)
-			 {
-                    servo1(16);
-             } else if (valor_servo1 <= 50)
-			 {
-                    servo1(8);
-             } else 
-			 {
-                    servo1(7 + ((valor_servo1 - 51) * 9) / 948);
-             }
+            ADMUX |= (1<<MUX2);          //cambia al canal 4
+            ADMUX &= ~(1<<MUX0);
+			ADMUX &= ~(1<<MUX1);
+            canal_actual = 4;
+			valor_servo1 = ADC;
+			servo1(4 + ((valor_servo1) * 15) / 1023);
+
         }else if (canal_actual == 4)
 		{
-             ADMUX |= (1<<MUX2) | (1<<MUX0);           //cambia al canal 5
-			 ADMUX &= ~(1<<MUX1);
-             canal_actual = 5;
-             valor_servo2 = ADC;
-             if (valor_servo2 >= 1000)
-			 {
-                    servo2(16);
-             } else if (valor_servo2 <= 50)
-			 {
-                    servo2(8);
-             } else 
-			 {
-                    servo2(7 + ((valor_servo2 - 51) * 9) / 948);
-             }
+            ADMUX |= (1<<MUX2) | (1<<MUX0);           //cambia al canal 5
+			ADMUX &= ~(1<<MUX1);
+			canal_actual = 5;
+			valor_servo2 = ADC;
+			servo2(4 + ((valor_servo2) * 15) / 1023);
 
        }else if(canal_actual == 5)
 	   {
-             ADMUX |= (1<<MUX2) | (1<<MUX1);          //cambia al canal 6
-             ADMUX &= ~(1<<MUX0);
-             canal_actual = 6;
-             valor_servo3 = ADC;
-             if (valor_servo3 >= 1000)
-			 {
-                    servo3(16);
-             } else if (valor_servo3 <= 50)
-			 {
-                    servo3(8);
-             } else 
-			 {
-					servo3(7 + ((valor_servo3 - 51) * 9) / 948);
-             }
+			ADMUX |= (1<<MUX2) | (1<<MUX1);          //cambia al canal 6
+			ADMUX &= ~(1<<MUX0);
+			canal_actual = 6;
+			valor_servo3 = ADC;
+
+		    servo3(4 + ((valor_servo3) * 15) / 1023);
+
        }else if(canal_actual == 6)
 	   {
-             ADMUX |= (1<<MUX0) | (1<<MUX1);          //cambia al canal 3
-             ADMUX &= ~(1<<MUX2);
-             canal_actual = 3;
-             valor_servo4 = ADC;
-             if (valor_servo4 >= 1000)
-             {
-	             servo4(16);
-             } else if (valor_servo4 <= 50)
-             {
-	             servo4(8);
-             } else
-             {
-	             servo4(7 + ((valor_servo4 - 51) * 9) / 948);
-             }		   
+			ADMUX |= (1<<MUX0) | (1<<MUX1);          //cambia al canal 3
+			ADMUX &= ~(1<<MUX2);
+			canal_actual = 3;
+			valor_servo4 = ADC;
+			servo4(4 + ((valor_servo4) * 15) / 1023);	   
 		   
 	   }
 }
@@ -139,20 +122,107 @@ ISR(ADC_vect)
 }
 
 ISR(PCINT2_vect) {
-	if (!(PIND & (1 << PIND2))) {
-		if (modo ==1 ){
-		//Funcion para guardar
+	if (!(PIND & (1 << PIND7))){
+		if (modo == 1){
+		posicion_servos++;
+		if(posicion_servos == 5){
+			posicion_servos = 1;
+		}	
+		}
+		if (modo == 2){
+		posicion_servos++;
+		if(posicion_servos == 5){
+		posicion_servos = 1;
+		}
+		switch(posicion_servos){
+		case (1):
+			valor_servo1 = eeprom_read_word(&eeprom_valor1);
+			valor_servo2 = eeprom_read_word(&eeprom_valor2);
+			valor_servo3 = eeprom_read_word(&eeprom_valor3);
+			valor_servo4 = eeprom_read_word(&eeprom_valor4);
+			break;
+		case (2):
+			valor_servo1 = eeprom_read_word(&eeprom_valor1_1);
+			valor_servo2 = eeprom_read_word(&eeprom_valor2_1);
+			valor_servo3 = eeprom_read_word(&eeprom_valor3_1);
+			valor_servo4 = eeprom_read_word(&eeprom_valor4_1);
+			break;
+		case (3):
+			valor_servo1 = eeprom_read_word(&eeprom_valor1_2);
+			valor_servo2 = eeprom_read_word(&eeprom_valor2_2);
+			valor_servo3 = eeprom_read_word(&eeprom_valor3_2);
+			valor_servo4 = eeprom_read_word(&eeprom_valor4_2);
+			break;
+		case (4):
+			valor_servo1 = eeprom_read_word(&eeprom_valor1_3);
+			valor_servo2 = eeprom_read_word(&eeprom_valor2_3);
+			valor_servo3 = eeprom_read_word(&eeprom_valor3_3);
+			valor_servo4 = eeprom_read_word(&eeprom_valor4_3);
+			break;
 		
-		/*
+	}
+	///////////////////////////////////
+	servo1(4 + ((valor_servo1) * 15) / 1023);
+	///////////////////////////////////
+	servo2(4 + ((valor_servo2) * 15) / 1023);
+	///////////////////////////////////
+	servo3(4 + ((valor_servo3) * 15) / 1023);
+	///////////////////////////////////
+	servo4(4 + ((valor_servo4) * 15) / 1023);
+		}
+		
+	}
+	if (!(PIND & (1 << PIND2))) {
+		if (modo == 1 ){
+		//Funcion para guardar
 		eeprom_update_word(&eeprom_valor1, valor_servo1);
 		eeprom_update_word(&eeprom_valor2, valor_servo2);
 		eeprom_update_word(&eeprom_valor3, valor_servo3);
 		eeprom_update_word(&eeprom_valor4, valor_servo4);
-		*/
+		
 		}
+		if (modo == 2){
+			posicion_servos++;
+			if(posicion_servos == 5){
+				posicion_servos = 1;
+			}
+			switch(posicion_servos){
+				case (1):
+				eeprom_update_word(&eeprom_valor1, valor_servo1);
+				eeprom_update_word(&eeprom_valor2, valor_servo2);
+				eeprom_update_word(&eeprom_valor3, valor_servo3);
+				eeprom_update_word(&eeprom_valor4, valor_servo4);
+				break;
+				case (2):
+				eeprom_update_word(&eeprom_valor1_1, valor_servo1);
+				eeprom_update_word(&eeprom_valor2_1, valor_servo2);
+				eeprom_update_word(&eeprom_valor3_1, valor_servo3);
+				eeprom_update_word(&eeprom_valor4_1, valor_servo4);
+				break;
+				case (3):
+				eeprom_update_word(&eeprom_valor1_2, valor_servo1);
+				eeprom_update_word(&eeprom_valor2_2, valor_servo2);
+				eeprom_update_word(&eeprom_valor3_2, valor_servo3);
+				eeprom_update_word(&eeprom_valor4_2, valor_servo4);
+				break;
+				case (4):
+				eeprom_update_word(&eeprom_valor1_3, valor_servo1);
+				eeprom_update_word(&eeprom_valor2_3, valor_servo2);
+				eeprom_update_word(&eeprom_valor3_3, valor_servo3);
+				eeprom_update_word(&eeprom_valor4_3, valor_servo4);
+				break;
 		
-		
-	}
+			}
+			///////////////////////////////////
+			servo1(4 + ((valor_servo1) * 15) / 1023);
+			///////////////////////////////////
+			servo2(4 + ((valor_servo2) * 15) / 1023);
+			///////////////////////////////////
+			servo3(4 + ((valor_servo3) * 15) / 1023);
+			///////////////////////////////////
+			servo4(4 + ((valor_servo4) * 15) / 1023);
+		}
+}
 	if (!(PIND & (1 << PIND4))) {
 		modo++;
 		if(modo == 4){
@@ -165,56 +235,21 @@ ISR(PCINT2_vect) {
 			PORTB &= ~(1<<PORTB3);
 			PORTB &= ~(1<<PORTB0);
 		}else if (modo == 2){
-			/*
+			posicion_servos = 1;
 			valor_servo1 = eeprom_read_word(&eeprom_valor1);
 			valor_servo2 = eeprom_read_word(&eeprom_valor2);
 			valor_servo3 = eeprom_read_word(&eeprom_valor3);
 			valor_servo4 = eeprom_read_word(&eeprom_valor4);
-			*/
+			
 		   ///////////////////////////////////
-	       if (valor_servo1 >= 1000)
-	       {
-		       servo1(16);
-	       } else if (valor_servo1 <= 50)
-	       {
-		       servo1(8);
-	       } else
-	       {
-		       servo1(7 + ((valor_servo1 - 51) * 9) / 948);
-	       }
+		       servo1(4 + ((valor_servo1) * 15) / 1023);
 		   ///////////////////////////////////
-	       if (valor_servo2 >= 1000)
-	       {
-		       servo2(16);
-	       } else if (valor_servo2 <= 50)
-	       {
-		       servo2(8);
-	       } else
-	       {
-		       servo2(7 + ((valor_servo2 - 51) * 9) / 948);
-	       }
+		       servo2(4 + ((valor_servo2) * 15) / 1023);
 		   ///////////////////////////////////
-	       if (valor_servo3 >= 1000)
-	       {
-		       servo3(16);
-	       } else if (valor_servo3 <= 50)
-	       {
-		       servo3(8);
-	       } else
-	       {
-		       servo3(7 + ((valor_servo3 - 51) * 9) / 948);
-	       }
+		       servo3(4 + ((valor_servo3) * 15) / 1023);
 		   ///////////////////////////////////
-	       if (valor_servo4 >= 1000)
-	       {
-		       servo4(16);
-	       } else if (valor_servo4 <= 50)
-	       {
-		       servo4(8);
-	       } else
-	       {
-		       servo4(7 + ((valor_servo4 - 51) * 9) / 948);
-	       }
+		       servo4(4 + ((valor_servo4) * 15) / 1023);
+	
 	       
 			PORTD &= ~(1<<PORTD6);
 			PORTB |= (1<<PORTB0);
@@ -226,4 +261,3 @@ ISR(PCINT2_vect) {
 		}
 	}
 }
-
