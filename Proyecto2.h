@@ -25,4 +25,3 @@ void servo3(uint16_t ancho3);
 void servo4(uint16_t ancho4);
  
 #endif /* PROYECTO2_H_ */
-
