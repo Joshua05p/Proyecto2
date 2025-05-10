@@ -91,3 +91,17 @@ void servo3(uint16_t ancho3) {
 void servo4(uint16_t ancho4) {
 		OCR2B = ancho4;
 }
+
+void enviar(char data) {
+	while (!(UCSR0A & (1 << UDRE0)));
+	UDR0 = data;
+
+}
+
+void cadena(char *caracteres) {
+	while (*caracteres != '\0'){
+		enviar(*caracteres);
+		caracteres++;
+	}
+
+}
