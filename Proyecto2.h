@@ -23,5 +23,7 @@ void servo1(uint16_t ancho1);
 void servo2(uint16_t ancho2);
 void servo3(uint16_t ancho3);
 void servo4(uint16_t ancho4);
+void enviar(char data);
+void cadena();
  
 #endif /* PROYECTO2_H_ */
