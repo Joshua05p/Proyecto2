@@ -11,6 +11,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
+#include <stdlib.h>
 #include "Proyecto2.h"
 
 /****************************************/
@@ -22,6 +23,7 @@ uint16_t valor_servo3 = 0;
 uint16_t valor_servo4 = 0;
 uint8_t  canal_actual = 3;
 uint8_t  modo		  = 1;
+char caracter;
 uint16_t EEMEM eeprom_valor1;
 uint16_t EEMEM eeprom_valor2;
 uint16_t EEMEM eeprom_valor3;
@@ -42,6 +44,19 @@ uint16_t EEMEM eeprom_valor2_3;
 uint16_t EEMEM eeprom_valor3_3;
 uint16_t EEMEM eeprom_valor4_3;
 uint8_t posicion_servos = 1;
+#define BUFFER_SIZE 16
+volatile char buffer[BUFFER_SIZE];
+volatile uint8_t posicion = 0;
+
+volatile uint16_t motor1 = 0;
+volatile uint16_t motor2 = 0;
+volatile uint16_t motor3 = 0;
+volatile uint16_t motor4 = 0;
+
+
+uint16_t extraer_numero(const char *msg) {
+	return atoi(&msg[3]);
+}
 /****************************************/
 // Main Function
 
@@ -122,18 +137,15 @@ ISR(ADC_vect)
 }
 
 ISR(PCINT2_vect) {
+	
 	if (!(PIND & (1 << PIND7))){
-		if (modo == 1){
 		posicion_servos++;
 		if(posicion_servos == 5){
 			posicion_servos = 1;
-		}	
 		}
+
+		
 		if (modo == 2){
-		posicion_servos++;
-		if(posicion_servos == 5){
-		posicion_servos = 1;
-		}
 		switch(posicion_servos){
 		case (1):
 			valor_servo1 = eeprom_read_word(&eeprom_valor1);
@@ -161,67 +173,51 @@ ISR(PCINT2_vect) {
 			break;
 		
 	}
-	///////////////////////////////////
-	servo1(4 + ((valor_servo1) * 15) / 1023);
-	///////////////////////////////////
-	servo2(4 + ((valor_servo2) * 15) / 1023);
-	///////////////////////////////////
-	servo3(4 + ((valor_servo3) * 15) / 1023);
-	///////////////////////////////////
-	servo4(4 + ((valor_servo4) * 15) / 1023);
+		///////////////////////////////////
+		servo1(4 + ((valor_servo1) * 15) / 1023);
+		///////////////////////////////////
+		servo2(4 + ((valor_servo2) * 15) / 1023);
+		///////////////////////////////////
+		servo3(4 + ((valor_servo3) * 15) / 1023);
+		///////////////////////////////////
+		servo4(4 + ((valor_servo4) * 15) / 1023);
 		}
 		
 	}
 	if (!(PIND & (1 << PIND2))) {
 		if (modo == 1 ){
 		//Funcion para guardar
-		eeprom_update_word(&eeprom_valor1, valor_servo1);
-		eeprom_update_word(&eeprom_valor2, valor_servo2);
-		eeprom_update_word(&eeprom_valor3, valor_servo3);
-		eeprom_update_word(&eeprom_valor4, valor_servo4);
-		
+		switch(posicion_servos){
+			case (1):
+			eeprom_update_word(&eeprom_valor1, valor_servo1);
+			eeprom_update_word(&eeprom_valor2, valor_servo2);
+			eeprom_update_word(&eeprom_valor3, valor_servo3);
+			eeprom_update_word(&eeprom_valor4, valor_servo4);
+			break;
+			case (2):
+			eeprom_update_word(&eeprom_valor1_1, valor_servo1);
+			eeprom_update_word(&eeprom_valor2_1, valor_servo2);
+			eeprom_update_word(&eeprom_valor3_1, valor_servo3);
+			eeprom_update_word(&eeprom_valor4_1, valor_servo4);
+			break;
+			case (3):
+			eeprom_update_word(&eeprom_valor1_2, valor_servo1);
+			eeprom_update_word(&eeprom_valor2_2, valor_servo2);
+			eeprom_update_word(&eeprom_valor3_2, valor_servo3);
+			eeprom_update_word(&eeprom_valor4_2, valor_servo4);
+			break;
+			case (4):
+			eeprom_update_word(&eeprom_valor1_3, valor_servo1);
+			eeprom_update_word(&eeprom_valor2_3, valor_servo2);
+			eeprom_update_word(&eeprom_valor3_3, valor_servo3);
+			eeprom_update_word(&eeprom_valor4_3, valor_servo4);
+			break;
+			
 		}
-		if (modo == 2){
-			posicion_servos++;
-			if(posicion_servos == 5){
-				posicion_servos = 1;
-			}
-			switch(posicion_servos){
-				case (1):
-				eeprom_update_word(&eeprom_valor1, valor_servo1);
-				eeprom_update_word(&eeprom_valor2, valor_servo2);
-				eeprom_update_word(&eeprom_valor3, valor_servo3);
-				eeprom_update_word(&eeprom_valor4, valor_servo4);
-				break;
-				case (2):
-				eeprom_update_word(&eeprom_valor1_1, valor_servo1);
-				eeprom_update_word(&eeprom_valor2_1, valor_servo2);
-				eeprom_update_word(&eeprom_valor3_1, valor_servo3);
-				eeprom_update_word(&eeprom_valor4_1, valor_servo4);
-				break;
-				case (3):
-				eeprom_update_word(&eeprom_valor1_2, valor_servo1);
-				eeprom_update_word(&eeprom_valor2_2, valor_servo2);
-				eeprom_update_word(&eeprom_valor3_2, valor_servo3);
-				eeprom_update_word(&eeprom_valor4_2, valor_servo4);
-				break;
-				case (4):
-				eeprom_update_word(&eeprom_valor1_3, valor_servo1);
-				eeprom_update_word(&eeprom_valor2_3, valor_servo2);
-				eeprom_update_word(&eeprom_valor3_3, valor_servo3);
-				eeprom_update_word(&eeprom_valor4_3, valor_servo4);
-				break;
 		
-			}
-			///////////////////////////////////
-			servo1(4 + ((valor_servo1) * 15) / 1023);
-			///////////////////////////////////
-			servo2(4 + ((valor_servo2) * 15) / 1023);
-			///////////////////////////////////
-			servo3(4 + ((valor_servo3) * 15) / 1023);
-			///////////////////////////////////
-			servo4(4 + ((valor_servo4) * 15) / 1023);
-		}
+	}
+
+		
 }
 	if (!(PIND & (1 << PIND4))) {
 		modo++;
@@ -242,13 +238,13 @@ ISR(PCINT2_vect) {
 			valor_servo4 = eeprom_read_word(&eeprom_valor4);
 			
 		   ///////////////////////////////////
-		       servo1(4 + ((valor_servo1) * 15) / 1023);
+		    servo1(4 + ((valor_servo1) * 15) / 1023);
 		   ///////////////////////////////////
-		       servo2(4 + ((valor_servo2) * 15) / 1023);
+		    servo2(4 + ((valor_servo2) * 15) / 1023);
 		   ///////////////////////////////////
-		       servo3(4 + ((valor_servo3) * 15) / 1023);
+		    servo3(4 + ((valor_servo3) * 15) / 1023);
 		   ///////////////////////////////////
-		       servo4(4 + ((valor_servo4) * 15) / 1023);
+		    servo4(4 + ((valor_servo4) * 15) / 1023);
 	
 	       
 			PORTD &= ~(1<<PORTD6);
@@ -260,4 +256,32 @@ ISR(PCINT2_vect) {
 			PORTB |= (1<<PORTB3);
 		}
 	}
+}
+
+ISR(USART_RX_vect) {
+	char c = UDR0;
+
+		if (c == '#') {
+			buffer[posicion] = '\0'; // Finaliza cadena
+			posicion = 0;
+
+			if (buffer[0] == 'M' && buffer[1] == '1') {
+				motor1 = extraer_numero((const char *)buffer);
+				servo1(motor1);
+				
+				} else if (buffer[0] == 'M' && buffer[1] == '2') {
+				motor2 = extraer_numero((const char *)buffer);
+				servo2(motor2);
+				
+				} else if (buffer[0] == 'M' && buffer[1] == '3') {
+				motor3 = extraer_numero((const char *)buffer);
+				servo3(motor3);
+				
+				} else if (buffer[0] == 'M' && buffer[1] == '4') {
+				motor4 = extraer_numero((const char *)buffer);
+				servo4(motor4);
+			}
+			} else {
+			buffer[posicion++] = c;
+		}
 }
