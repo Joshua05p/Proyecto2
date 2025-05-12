@@ -55,39 +55,43 @@ def message(client, feed_id, payload):
     The feed_id parameter identifies the feed, and the payload parameter has
     the new value.
     """
+    print('Feed {0} received new value: {1}'.format(feed_id, payload))
+    if (feed_id =="M4"):
+        valor = int(payload)
+        posicion_servo = int((14 / 180) * valor + 4)
+    else:
+        valor = int(payload)
+        posicion_servo = int((14 / 180) * valor + 4)
+
+    #//////////////////////////////////////////////////////////////////////////
     if (feed_id == "M1"):
-        #posicion_servo = 4 + (payload/135)*14
-        #mensaje = "M1 " + posicion_servo + "#"
-        mensaje = "M1 " + payload + "#"
+        mensaje = "M1 " + str(posicion_servo) + "#"
         miarduino.write(bytes(mensaje, 'utf-8'))
         print('Sendind data back: {0}'.format(payload))
         client.publish(FEED_ID_Send1, payload)
     if (feed_id == "M2"):
-        #posicion_servo = 4 + (payload/135)*14
-        #mensaje = "M2 " + posicion_servo + "#"
-        mensaje = "M2 " + payload + "#"
+        mensaje = "M2 " + str(posicion_servo) + "#"
+        #mensaje = "M2 " + payload + "#"
         miarduino.write(bytes(mensaje, 'utf-8'))
         print('Sendind data back: {0}'.format(payload))
         client.publish(FEED_ID_Send2, payload)
     if (feed_id == "M3"):
-        #posicion_servo = 4 + (payload/135)*14
-        #mensaje = "M3 " + posicion_servo + "#"
-        mensaje = "M3 " + payload + "#"
+        mensaje = "M3 " + str(posicion_servo) + "#"
+        #mensaje = "M3 " + payload + "#"
         miarduino.write(bytes(mensaje, 'utf-8'))
         print('Sendind data back: {0}'.format(payload))
         client.publish(FEED_ID_Send3, payload)
     if (feed_id == "M4"):
-        #posicion_servo = 4 + (payload/135)*14 #CAMBIAR
-        #mensaje = "M4 " + posicion_servo + "#"
-        mensaje = "M4 " + payload + "#"
+        mensaje = "M4 " + str(posicion_servo) + "#"
+        #mensaje = "M4 " + payload + "#"
         miarduino.write(bytes(mensaje, 'utf-8'))
         print('Sendind data back: {0}'.format(payload))
         client.publish(FEED_ID_Send4, payload)
-    print('Feed {0} received new value: {1}'.format(feed_id, payload))
+    #print('Feed {0} received new value: {1}'.format(feed_id, payload))
     # Publish or "send" message to corresponding feed
-    print('Sendind data back: {0}'.format(payload))
+    #print('Sendind data back: {0}'.format(payload))
 
-miarduino = serial.Serial(port='COM7', baudrate=9600, timeout=0.1)
+miarduino = serial.Serial(port='COM4', baudrate=9600, timeout=0.1)
 # Create an MQTT client instance.
 client = MQTTClient(ADAFRUIT_IO_USERNAME, ADAFRUIT_IO_KEY)
 
@@ -112,5 +116,5 @@ while True:
     print('sending count: ', run_count)
     client.publish(FEED_ID_Send, run_count)
     """
-    print('Running "main loop" ')
+    #print('Running "main loop" ')
     time.sleep(3)
