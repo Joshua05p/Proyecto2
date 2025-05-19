@@ -17,16 +17,16 @@ void salidas(void) {
 	   DDRB |=		(1 << DDB1) | (1 << DDB2);
        DDRD |=		(1 << DDD5) | (1 << DDD3);
 	   //LEDS
-	   DDRB |=		(1 << DDB0) | (1 << DDB3) | (1 << DDB4);
-	   DDRD |=		(1 << DDD6) | (1 << DDD7);
+	   DDRB |=		(1 << DDB0) | (1 << DDB3) | (1 << DDB4) | (1 << DDB5);
+	   DDRD |=		(1 << DDD6);
 	   
 	   //Entradas
 	   DDRD &= ~(1<<DDD2);
 	   DDRD &= ~(1<<DDD4);
 	   DDRD &= ~(1<<DDD7);
-	   PORTD |= (1 << PORTD2) | (1<<PORTD4);
+	   PORTD |= (1 << PORTD2) | (1<<PORTD4) | (1<<PORTD7);
 	   PCICR |=		(1<<PCIE2);
-	   PCMSK2 |=(1<<PCINT18) | (1<<PCINT20);
+	   PCMSK2 |= (1<<PCINT18) | (1<<PCINT20) | (1<<PCINT23);
 	   sei();
 }
 void confi_timer2(){
