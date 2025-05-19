@@ -14,7 +14,7 @@ run_count = 0
 # Remember, your key is a secret,
 # so make sure not to publish it when you publish this code!
 ADAFRUIT_IO_USERNAME = "Joshua"
-ADAFRUIT_IO_KEY = "Key"
+ADAFRUIT_IO_KEY = "key"
 
 # Set to the ID of the feed to subscribe to for updates.
 FEED_ID_receive = 'Counter_TX'
@@ -56,12 +56,8 @@ def message(client, feed_id, payload):
     the new value.
     """
     print('Feed {0} received new value: {1}'.format(feed_id, payload))
-    if (feed_id =="M4"):
-        valor = int(payload)
-        posicion_servo = int((14 / 180) * valor + 4)
-    else:
-        valor = int(payload)
-        posicion_servo = int((14 / 180) * valor + 4)
+    valor = int(payload)
+    posicion_servo = int((14 / 180) * valor + 4)
 
     #//////////////////////////////////////////////////////////////////////////
     if (feed_id == "M1"):
